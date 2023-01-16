@@ -1,0 +1,170 @@
+#!/bin/sh
+
+line_detection
+line-detection
+line-detection-api
+line-detection-worker
+
+# build image and container
+docker-compose up -d api analysis-worker
+docker-compose up -d --build api analysis-worker
+
+# no-cached-image
+docker-compose build --no-cache api analysis-worker
+
+# 単体コンテナ起動(background)
+docker run --name {container name} -it -d {image repository name} {command}
+docker run --name line-detection-worker -it -d line-detection-api_analysis-worker  python3
+
+# apiに必要なnpmモジュールをinstall
+docker exec line-detection-api npm install
+# もしくは(version関係でエラーが出たら, versionを下げてinstall)
+docker exec line-detection-api npm install -g serverless@2.5.0
+
+# apiに必要なpythonモジュールをinstall
+docker exec line-detection-api poetry install
+
+# api_model.jsonを作成
+docker exec line-detection-api poetry run ./bin/generate-schema api_model.ApiModel
+
+# workerに必要なpythonモジュールをインストール
+docker exec line-detection-worker poetry install
+
+# run all containers
+docker-compose up -d
+
+# apiプロセスの実行(apiキー指定)
+docker exec line-detection-api poetry run sls offline --host 0.0.0.0 --apiKey pOabfDXZ7s1kbOqryQvK034VLUIvapbLatb465uM --httpPort 3333
+docker exec line-detection-api poetry run sls offline --host 0.0.0.0 --apiKey dummy --httpPort 3333
+
+# workerプロセスの実行
+docker exec line-detection-worker poetry run python main.py
+
+# echo-serverのログの出力確認
+docker-compose logs -f echo-server
+
+######################################################################################
+テスト
+######################################################################################
+# test api
+docker exec line-detection-api poetry run pytest test/api/
+
+# test worker analysis
+docker exec line-detection-worker poetry run pytest test/worker/
+
+# test worker libary
+docker exec line-detection-worker poetry run pytest test/lib/
+
+######################################################################
+SNIPETS
+######################################################################
+# AWS CLI コマンドが呼び出され、IAM ユーザーアクセス権があることを確認する
+aws sts get-caller-identity --profile aoz
+
+# 入力ファイルの内容をbase64エンコードしてファイル出力する
+$ base64 -i {inputdata path} -o {outputdata path}
+
+# 入力ファイルの内容をbase64デコードしてファイル出力する
+$ base64 -D -i {inputdata path} -o {outputdata path}
+
+# docker exec for api
+docker exec -it line-detection-api bash
+
+# docker exec for worker
+docker exec -it line-detection-worker bash
+
+# パッケージインストール
+poetry add git+ssh://git@github.com/concores/line-detection.git#package_v2.0
+poetry add git+https://github.com/concores/aoz-wrapper.git#data_management_table
+
+# パッケージアップデート
+poetry update {package name}
+
+# restart docker container worker
+docker restart {container name}
+
+# start all containers
+docker start $(docker ps -a -q)
+
+# Restart all containers
+docker restart $(docker ps -a -q)
+
+# stop all containers
+docker stop $(docker ps -q)
+
+# delete all containers
+docker rm $(docker ps -q -a)
+
+# delete all images
+docker rmi $(docker images -q)
+
+#######################################################################
+CloudFormation
+#######################################################################
+* CloudFormationでは以下のAWSリソースを作成します。
+・worker の Elastic Beanstalk 環境
+・上記に必用な SecurityGroup と IAM Role
+・api に必用な SSL 証明書の登録(CertificateManager)
+・CloudFormationの実行はローカル環境で実行して下さい。
+
+# s3
+aws cloudformation create-stack \
+--stack-name line-detection-s3 \
+--template-body file://cloudformation/s3.yaml \
+--capabilities CAPABILITY_NAMED_IAM \
+--profile [実行環境にあわせたプロファイル名]
+
+
+# api
+aws cloudformation create-stack \
+--stack-name line-detection-api \
+--template-body file://cloudformation/api.yaml \
+--capabilities CAPABILITY_NAMED_IAM \
+--profile [実行環境にあわせたプロファイル名]
+
+# worker
+aws cloudformation create-stack \
+--stack-name line-detection-worker \
+--template-body file://cloudformation/worker.yaml \
+--capabilities CAPABILITY_NAMED_IAM \
+--profile [実行環境にあわせたプロファイル名]
+
+######################################################################
+API環境構築（デプロイ）方法
+######################################################################
+# apiコンテナへ
+docker exec -it line-detection-api bash
+
+# カスタムドメイン作成(初回構築時のみ実行)
+poetry run env AWS_PROFILE=aoz sls create_domain --stage ${STAGE}
+
+# API環境構築とデプロイ
+poetry run env AWS_PROFILE=aoz sls deploy --stage ${STAGE}
+
+######################################################################
+Worker環境構築（デプロイ）方法
+######################################################################
+# workerコンテナへログイン
+docker exec -it line-detection-worker bash
+
+# EB作成
+poetry run ./eb/eb_create.sh line-detection
+
+# EB更新(デプロイ)
+poetry run ./eb/eb_deploy.sh line-detection
+
+
+#######################################################################
+その他
+#######################################################################
+# line-detection-api-key(dev)
+
+
+# カスタムドメイン名(dev）
+dev.line-detection.api.aoz.cloud
+
+# カスタムドメイン名(prod）
+line-detection.api.aoz.cloud
+
+# API Gateway ドメイン名 (dev)
+d-oemi34ayr7.execute-api.ap-northeast-1.amazonaws.com

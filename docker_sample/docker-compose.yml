@@ -1,0 +1,13 @@
+# Dockerのversionの指定??
+version: '3'
+services:
+  dev:
+    restart: always
+    build: .
+    container_name: 'drawing_type_classification'
+    # env_file:
+    #   - .env
+    working_dir: '/root/'
+    tty: true
+    volumes:
+      - ./test_data:/root/opt

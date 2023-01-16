@@ -1,0 +1,62 @@
+// For format details, see https://aka.ms/vscode-remote/devcontainer.json or this file's README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.163.0/containers/python-3
+{
+	"name": "table_area_detection",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": "..",
+		"args": {
+			// Update 'VARIANT' to pick a Python version: 3, 3.6, 3.7, 3.8, 3.9
+			"VARIANT": "3.8",
+		}
+	},
+	// Set *default* container specific settings.json values on container create.
+	"settings": {
+		// "python.pythonPath": "/usr/local/bin/python",
+		"python.pythonPath": "/home/vscode/.cache/pypoetry/virtualenvs/table-area-detection-Ip7SH16J-py3.8/bin/python",
+		"python.languageServer": "Pylance",
+		"python.linting.enabled": true,
+		"python.linting.pylintEnabled": false,
+		"python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
+		"python.formatting.blackPath": "/usr/local/py-utils/bin/black",
+		"python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
+		"python.linting.banditPath": "/usr/local/py-utils/bin/bandit",
+		"python.linting.flake8Path": "/usr/local/py-utils/bin/flake8",
+		"python.linting.mypyPath": "/usr/local/py-utils/bin/mypy",
+		"python.linting.pycodestylePath": "/usr/local/py-utils/bin/pycodestyle",
+		"python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
+		"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint",
+		"[python]": {
+			"editor.wordBasedSuggestions": false,
+			"editor.formatOnSave": true
+		}
+	},
+	// Add the IDs of extensions you want installed when the container is created.
+	"extensions": [
+		"ms-python.python",
+		"ms-python.vscode-pylance",
+		"coenraads.bracket-pair-colorizer-2",
+		"donjayamanne.githistory",
+		"eamodio.gitlens",
+		"oderwat.indent-rainbow",
+		"ms-ceintl.vscode-language-pack-ja",
+		"ms-toolsai.jupyter",
+		"ionutvmi.path-autocomplete",
+		"njpwerner.autodocstring",
+		"njqdev.vscode-python-typehint",
+		"kevinrose.vsc-python-indent",
+		"tabnine.tabnine-vscode",
+		"jgclark.vscode-todo-highlight"
+	],
+	"mounts": [
+		// "source=/Volumes/USB_1TB/HanwaTekkou/data,target=/workspaces/HanwaTekkou/usb,type=bind,consistency=cached",
+		"source=/Volumes/GoogleDrive-117051946152776398938/.shortcut-targets-by-id/14r-TRcZ12gyDHMDSihPQrLFDumDD1UTI/01_冷熱事業/03_データ/0_アノテーションデータ/3_表領域・切り出し線,target=/workspaces/HanwaTekkou/drive,type=bind,consistency=cached"
+	],
+	"runArgs": [
+		"--name=table_area_detection",
+	],
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "pip install -U ipykernel",
+	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	"remoteUser": "vscode",
+}

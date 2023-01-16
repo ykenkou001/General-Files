@@ -1,0 +1,11 @@
+# docker ps　の出力結果に対し、"v2-api" を含む行を抽出し、その行の先頭のコンテナIDを取得する
+docker ps | grep "v2-api"  | awk '{print $1}' 
+
+# docker ps　の出力結果に対し、150文字以降、2〜5行目までを抽出する
+docker ps | cut -c 150- | sed -n -e 2,5p
+
+# docker ps　の出力結果に対し、"REPO", "text", "perpen"を含む行を削除して出力する
+docker image ls | sed -e /REPO/d -e /text/d -e /perpen/d
+
+# 上記の出力に対し、１フィールド目のみを抽出する
+docker image ls | sed -e /REPO/d -e /text/d -e /perpen/d | awk '{print $1}'
