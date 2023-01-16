@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "general-files"
+version = "0.1.0"
+description = "docker samples, shell scripts, ....."
+authors = ["ykenkou001 <ykenkou001@gmail.com>"]
+readme = "README.md"
+packages = [{include = "general_files"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.20.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
